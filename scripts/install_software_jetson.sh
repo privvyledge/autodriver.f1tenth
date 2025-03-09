@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage ./install_software.sh
+# Usage ./install_software_jetson.sh
 
 # Author: Boluwatife Olabiran
 
@@ -90,7 +90,27 @@ echo "Allocated 16GB Swap memory."
 
 sudo systemctl disable nvargus-daemon.service  && echo "Disabled misc services"
 
-sudo systemctl set-default multi-user.target  # Disable desktop GUI. `sudo systemctl set-default graphical.target` to reenable.
+sudo systemctl set-default multi-user.target  && echo "Disabled desktop GUI"  # Disable desktop GUI. `sudo systemctl set-default graphical.target` to reenable.
+
+sudo apt-get install -y joystick jstest-gtk  && echo "Installed joystick support"
+
+cd /tmp && git clone https://github.com/YDLIDAR/ydlidar_ros2_driver.git -b humble
+chmod 0777 ydlidar_ros2_driver/startup/*
+sudo sh ydlidar_ros2_driver/startup/initenv.sh
+echo "Setup YDLIDAR UDEV rules"
+
+sudo apt install -y v4l-utils
+cd /tmp && git clone https://github.com/IntelRealSense/librealsense.git && cd librealsense
+sudo sh scripts/setup_udev_rules.sh
+echo "Setup Intel RealSense UDEV rules"
+
+echo 'KERNEL=="ttyACM[0-9]*", ACTION=="add", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0666", GROUP="dialout", SYMLINK+="sensors/vesc"' > /tmp/99-vesc.rules && sudo mv /tmp/99-vesc.rules /etc/udev/rules.d/99-vesc.rules
+echo "Setup VESC UDEV rules"
+
+echo 'KERNEL=="js[0-9]*", ACTION=="add", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c219", SYMLINK+="input/joypad-f710"' > /etc/udev/rules.d/99-joypad-f710.rules && sudo mv /tmp/99-joypad-f710.rules /etc/udev/rules.d/99-joypad-f710.rules
+echo "Setup Logitech F710 Joystick UDEV rules"
+
+sudo udevadm control --reload-rules && sudo udevadm trigger && echo "Reloaded UDEV rules"  # reload UDEV rules
 
 echo "Installation complete"
 exit 0
