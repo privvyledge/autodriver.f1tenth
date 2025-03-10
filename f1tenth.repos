@@ -1,0 +1,153 @@
+repositories:
+  f1tenth_system:
+    type: git
+    url: https://github.com/privvyledge/f1tenth_system.git
+    version: humble-devel
+  nonpersistent_voxel_layer:
+    type: git
+    url: https://github.com/SteveMacenski/nonpersistent_voxel_layer.git
+    version: 2.4.0
+  f1tenth_launch:
+    type: git
+    url: https://github.com/privvyledge/f1tenth_launch.git
+    version: humble-dev
+  trajectory_following_ros2:
+    type: git
+    url: https://github.com/privvyledge/trajectory_following_ros2.git
+    version: master
+  f1tenth_autoware_launch_py:
+    type: git
+    url: https://github.com/privvyledge/f1tenth_autoware_launch_py.git
+    version: master
+  laser_filters:
+    type: git
+    url: https://github.com/ros-perception/laser_filters.git
+    version: ros2
+  depthimage_to_laserscan:
+    type: git
+    url: https://github.com/marcusvinicius178/depthimage_to_laserscan.git
+    version: fix-QoS-issue
+  rf2o_laser_odometry:
+    type: git
+    url: https://github.com/MAPIRlab/rf2o_laser_odometry.git
+    version: ros2
+  ydlidar_ros2_driver:
+    type: git
+    url: https://github.com/YDLIDAR/ydlidar_ros2_driver.git
+    version: humble
+  ros_images_to_files:
+    type: git
+    url: https://github.com/privvyledge/ros_images_to_files.git
+    version: master
+  autodriver_fake_obstacle_publisher:
+    type: git
+    url: https://github.com/privvyledge/autodriver_fake_obstacle_publisher.git
+    version: master
+  autodriver_image_object_detection:
+    type: git
+    url: https://github.com/privvyledge/autodriver_image_object_detection.git
+    version: master
+  autodriver_pointcloud_object_detection:
+    type: git
+    url: https://github.com/privvyledge/autodriver_pointcloud_object_detection.git
+    version: master
+  autodriver_pointcloud_preprocessor:
+    type: git
+    url: https://github.com/privvyledge/autodriver_pointcloud_preprocessor.git
+    version: master
+  autodriver_icp_localizer:
+    type: git
+    url: https://github.com/privvyledge/autodriver_icp_localizer.git
+    version: master
+  isaac_manipulator:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_manipulator.git
+    version: release-3.2
+  isaac_perceptor:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_perceptor.git
+    version: release-3.2
+  isaac_ros_apriltag:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_apriltag.git
+    version: release-3.2
+  isaac_ros_argus_camera:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_argus_camera.git
+    version: release-3.2
+  isaac_ros_depth_segmentation:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_depth_segmentation.git
+    version: release-3.2
+  isaac_ros_dnn_inference:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_dnn_inference.git
+    version: release-3.2
+  isaac_ros_dnn_stereo_depth:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_dnn_stereo_depth.git
+    version: release-3.2
+  isaac_ros_freespace_segmentation:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_freespace_segmentation.git
+    version: release-3.2
+  isaac_ros_image_pipeline:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_image_pipeline.git
+    version: release-3.2
+  isaac_ros_image_segmentation:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_image_segmentation.git
+    version: release-3.2
+  isaac_ros_compression:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_compression.git
+    version: release-3.2
+  isaac_ros_map_localization:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_map_localization.git
+    version: release-3.2
+  isaac_ros_mission_client:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_mission_client.git
+    version: release-3.2
+  isaac_ros_nitros:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nitros.git
+    version: release-3.2
+  isaac_ros_nova:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nova.git
+    version: release-3.2
+  isaac_ros_nvblox:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nvblox.git
+    version: release-3.2
+  isaac_ros_visual_slam:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_visual_slam.git
+    version: release-3.2
+  isaac_ros_mapping_and_localization:
+    type: git
+    url: https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_mapping_and_localization.git
+    version: release-3.2
+  magic_enum:
+    type: git
+    url: https://github.com/Neargye/magic_enum.git
+    version: v0.9.6
+  opennav_docking:
+    type: git
+    url: https://github.com/open-navigation/opennav_docking.git
+    version: humble
+  sllidar_ros2:
+    type: git
+    url: https://github.com/Slamtec/sllidar_ros2.git
+    version: main
+  spatio_temporal_voxel_layer:
+    type: git
+    url: https://github.com/SteveMacenski/spatio_temporal_voxel_layer
+    version: ros2
+  foxglove/schemas:
+    type: git
+    url: https://github.com/foxglove/schemas
+    version: main

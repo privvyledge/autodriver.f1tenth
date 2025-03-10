@@ -10,7 +10,7 @@
 set -e
 
 sudo apt-get update && sudo apt-get install openssh-server && echo "Installed SSH."  # ssh
-sudo apt update && sudo apt install -y python3-dev python3-pip python3-setuptools python3-venv build-essential git curl nano ccmake  && echo "Installation common dependencies"  # common dependencies
+sudo apt update && sudo apt install -y python3-dev python3-pip python3-setuptools python3-venv build-essential git curl nano cmake  && echo "Installation common dependencies"  # common dependencies
 sudo pip3 install -U jetson-stats && echo "Installed jtop"  # jtop
 
 # Install Docker. Comment out this block if installed using the sd card method or if docker is already installed.
@@ -62,11 +62,8 @@ sudo nvidia-ctk runtime configure --runtime=docker
 echo "Installed docker"
 # ### End: Docker installation block
 
-# Restart the docker service and add our user to the docker group to use without sudo
-sudo systemctl restart docker
-sudo usermod -aG docker $USER
-newgrp docker
-echo "Added user to docker group."
+## Restart the docker service and add our user to the docker group to use without sudo. Must be done outside this script as it causes the script to exit.
+#sudo systemctl restart docker && sudo usermod -aG docker $USER && newgrp docker && echo "Added user to docker group."
 
 # Add Nvidia to the default runtime
 sudo apt install -y jq
@@ -83,9 +80,12 @@ sudo nvpmodel -m 2  && echo "Set MAXN super as NVP power mode."
 
 sudo systemctl disable nvzramconfig && echo "Disabled zram."
 
-sudo fallocate -l 16G /ssd/16GB.swap
-sudo mkswap /ssd/16GB.swap
-sudo swapon /ssd/16GB.swap
+sudo fallocate -l 16G /mnt/16GB.swap
+sudo chmod 600 /mnt/16GB.swap
+sudo mkswap /mnt/16GB.swap
+sudo swapon /mnt/16GB.swap
+sudo cp /etc/fstab /etc/fstab.bak
+echo '/mnt/16GB.swap none swap sw 0 0' | sudo tee -a /etc/fstab
 echo "Allocated 16GB Swap memory."
 
 sudo systemctl disable nvargus-daemon.service  && echo "Disabled misc services"
@@ -104,10 +104,10 @@ cd /tmp && git clone https://github.com/IntelRealSense/librealsense.git && cd li
 sudo sh scripts/setup_udev_rules.sh
 echo "Setup Intel RealSense UDEV rules"
 
-echo 'KERNEL=="ttyACM[0-9]*", ACTION=="add", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0666", GROUP="dialout", SYMLINK+="sensors/vesc"' > /tmp/99-vesc.rules && sudo mv /tmp/99-vesc.rules /etc/udev/rules.d/99-vesc.rules
+echo 'KERNEL=="ttyACM[0-9]*", ACTION=="add", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0666", GROUP="dialout", SYMLINK+="sensors/vesc"' | sudo tee -a /etc/udev/rules.d/99-vesc.rules
 echo "Setup VESC UDEV rules"
 
-echo 'KERNEL=="js[0-9]*", ACTION=="add", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c219", SYMLINK+="input/joypad-f710"' > /etc/udev/rules.d/99-joypad-f710.rules && sudo mv /tmp/99-joypad-f710.rules /etc/udev/rules.d/99-joypad-f710.rules
+echo 'KERNEL=="js[0-9]*", ACTION=="add", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c219", SYMLINK+="input/joypad-f710"' | sudo tee -a /etc/udev/rules.d/99-joypad-f710.rules
 echo "Setup Logitech F710 Joystick UDEV rules"
 
 sudo udevadm control --reload-rules && sudo udevadm trigger && echo "Reloaded UDEV rules"  # reload UDEV rules
