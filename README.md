@@ -6,3 +6,7 @@
 5. Install packages: `cd autodriver.f1tenth && chmod +x scripts/* && ./scripts/install_software_jetson.sh && sudo systemctl restart docker && sudo usermod -aG docker $USER && newgrp docker`
 6. Pull the docker image
 7. Run teleoperation
+   1. Connect the joystick to the Jetson
+   2. Connect the VESC to the battery and Jetson
+   3. Connect the YDLIDAR to the Jetson
+   4. Connect the RealSense to the Jetson

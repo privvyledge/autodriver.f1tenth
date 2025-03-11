@@ -22,14 +22,14 @@ cd ${ISAAC_ROS_WS}/src
 git clone -b release-3.2 https://github.com/privvyledge/isaac_ros_common.git isaac_ros_common
 #cd ${ISAAC_ROS_WS}/src/isaac_ros_common/scripts && touch .isaac_ros_common-config && echo CONFIG_IMAGE_KEY=ros2_humble.realsense > .isaac_ros_common-config  # about 1 hour download (with ethernet) + realsense build
 #realsense-viewer  # Check if the realsense camera is detected. In docker
-cd ${ISAAC_ROS_WS}/src/isaac_ros_common/scripts && touch .isaac_ros_common-config && echo -e "CONFIG_IMAGE_KEY=ros2_humble.realsense.f1tenth\nCONFIG_DOCKER_SEARCH_DIRS=(../../autodriver.f1tenth/docker ../docker)" > .isaac_ros_common-config
+cd ${ISAAC_ROS_WS}/src/isaac_ros_common/scripts && touch .isaac_ros_common-config && echo -e "CONFIG_IMAGE_KEY=ros2_humble.realsense.f1tenth\nCONFIG_DOCKER_SEARCH_DIRS=(../../autodriver.f1tenth/docker ../docker)" > .isaac_ros_common-config  # 70 minutes total
 
 # Pull the repositories
 cd ${ISAAC_ROS_WS} && vcs import --recursive --workers 1 src < src/autodriver.f1tenth/f1tenth.repos
 
 mkdir -p ${HOME}/shared_dir ${HOME}/data
 cd ${ISAAC_ROS_WS}/src/isaac_ros_common/scripts
-echo -e "-v /dev:/dev\n-v ${HOME}/shared_dir:/mnt/shared_dir\n-v ${HOME}/data:/mnt/data\n-e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" > .isaac_ros_dev-dockerargs
+echo -e "-v /dev:/dev\n-v ${HOME}/shared_dir:/mnt/shared_dir\n-v ${HOME}/data:/mnt/data" > .isaac_ros_dev-dockerargs
 
 # Run the container
 cd ${ISAAC_ROS_WS}/src/isaac_ros_common/ && ./scripts/run_dev.sh -d $ISAAC_ROS_WS

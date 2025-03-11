@@ -55,7 +55,7 @@ RUN sudo apt-get update -y && DEBIAN_FRONTEND="noninteractive" sudo apt-get inst
     python3-rosdep \
 #    python3-matplotlib \
 #    python3-opencv \
-    python3-pil \
+#    python3-pil \
     python3-yaml \
     python3-tk \
     python3-pyqt5 \
@@ -97,7 +97,7 @@ RUN sudo apt-get update -y && DEBIAN_FRONTEND="noninteractive" sudo apt-get inst
 # Update pip and Set Python3 as default then install Controls related python packages
 RUN python3 -m pip install -U pip wheel && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    python3 -m pip install transforms3d numpy control "do-mpc==4.6.5" "casadi==3.6.7" "kornia==0.8.0" networkx pyserial
+    python3 -m pip install transforms3d "numpy==1.26.4" control "do-mpc==4.6.5" "casadi==3.6.7" "kornia==0.8.0" networkx pyserial
 
 ## Initialize ROS workspace
 #ENV BUILD_HOME=/f1tenth_ws
@@ -182,7 +182,7 @@ RUN mkdir -p ${HOME}/sdks && cd ${HOME}/sdks && \
     make -j$(($(nproc)-1)) && \
     sudo make install -j$(nproc) && \
     python3 -m pip install -U pip && \
-    python3 -m pip install --use-pep517 -e ${HOME}/sdks/acados/interfaces/acados_template && \
+    python3 -m pip install -e ${HOME}/sdks/acados/interfaces/acados_template && \
 #    curl https://sh.rustup.rs -sSf | sh -s -- -y && source $HOME/.cargo/env && \
     sudo apt update && sudo apt install -y rustc cargo && cd ../bin && \
     git clone https://github.com/acados/tera_renderer.git && cd tera_renderer && cargo build --verbose --release && \
@@ -266,62 +266,61 @@ RUN sudo apt-get update && \
     python3 -m pip install https://github.com/ultralytics/assets/releases/download/v0.0.0/torchvision-0.20.0a0+afc54f7-cp310-cp310-linux_aarch64.whl && \
     sudo apt-get update && sudo apt-get -y install libcusparselt0 libcusparselt-dev && \
     python3 -m pip install --upgrade pip wheel "setuptools==70.0.0" "setuptools_scm>=6.2" && \
-    cd ${HOME}/sdks/ultralytics/ && python3 -m pip install --no-cache-dir -e ".[export]" && \
-#    cd ${HOME}/sdks/ultralytics/ && python3 -m pip install --no-cache -e . && \
+    cd ${HOME}/sdks/ultralytics/ && python3 -m pip install -e ".[export]" && \
     python3 -m pip install "numpy==1.26.4" && \
     sudo rm -rf /var/lib/apt/lists/*
 #    export OMP_NUM_THREADS=1 && \
 
 
-##-----------------------------------------------
-## Install/build Open3D (https://www.open3d.org/docs/release/arm.html). Doesn't work in dusty-nv container but works in Nvidia Isaac ROS container.
-## To build, see https://www.open3d.org/docs/release/arm.html#building-open3d-python-wheel-with-docker
-# Note: for now the main Open3D branch does not compile with Jetson, so use the rislab fork. Also, do not build ML/Pytorch ops.
-# Do not install via Pip on Jetsons as it only installs CPU versions
-# VTK can either be built from source or installed via apt.
-##-----------------------------------------------
-#RUN python3 -m pip install "open3d==0.18.0"
-## use rislab's fork till the main Open3D repo fixes Jetson CUDA compilation issues
-## Todo:  realsense support,
-## Todo: test without specifying compiler options
-ARG ORIN_GPU_ARCHITECTURE="72;86;87"
-RUN python3 -m pip uninstall open3d && \
-    cd ${HOME}/sdks/ && \
-#    git clone https://github.com/isl-org/Open3D.git && \
-    git clone https://github.com/rislab/Open3D.git && \
-    cd Open3D && \
-    git checkout 8f00080 && \
-    bash ./util/install_deps_ubuntu.sh assume-yes && \
-    sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install -y --no-install-recommends \
-    git xorg-dev libxcb-shm0 libglu1-mesa-dev python3-dev clang libc++-dev libc++abi-dev libsdl2-dev ninja-build libxi-dev libtbb-dev \
-    libosmesa6-dev libudev-dev autoconf libtool gfortran && sudo rm -rf /var/lib/apt/lists/* && \
-    mkdir build && cd build && \
-    export CUDA_HOME=/usr/local/cuda && \
-    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/targets/aarch64-linux/lib/stubs:/opt/ros/${ROS_DISTRO}/install/lib:$LD_LIBRARY_PATH && \
-    export CUDACXX=/usr/local/cuda/bin/nvcc && export PATH=/usr/local/cuda/bin:${PATH} && \
-    export CC=/usr/bin/clang-14 && export CXX=/usr/bin/clang++-14 &&  \
-    cmake  \
-      -DBUILD_SHARED_LIBS=ON \
-      -DWITH_OPENMP=OFF \
-      -DBUILD_CUDA_MODULE=ON \
-      -DCMAKE_CUDA_ARCHITECTURES=${ORIN_GPU_ARCHITECTURE}  \
-      -DCUDAToolkit_ROOT=/usr/local/cuda \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DBUILD_GUI=OFF \
-      -DUSE_SYSTEM_VTK=ON -DBUILD_VTK_FROM_SOURCE=OFF \
-      -DBUILD_PYTORCH_OPS=OFF \
-      -DBUILD_TENSORFLOW_OPS=OFF \
-      -DBUNDLE_OPEN3D_ML=OFF \
-      -DBUILD_LIBREALSENSE=OFF \
-      -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
-      -DCMAKE_INSTALL_PREFIX=${HOME}/sdks/open3d_install \
-#      -DBUILD_PYTHON_MODULE=ON  \
-      -DPython3_EXECUTABLE=/usr/bin/python3 \
-      -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"  --no-warn-unused-cli \
-      .. && \
-    make -j$(($(nproc)-1)) && \
-    sudo apt remove python3-blinker -y && \
-    make install-pip-package && sudo make install
+###-----------------------------------------------
+### Install/build Open3D (https://www.open3d.org/docs/release/arm.html). Doesn't work in dusty-nv container but works in Nvidia Isaac ROS container.
+### To build, see https://www.open3d.org/docs/release/arm.html#building-open3d-python-wheel-with-docker
+## Note: for now the main Open3D branch does not compile with Jetson, so use the rislab fork. Also, do not build ML/Pytorch ops.
+## Do not install via Pip on Jetsons as it only installs CPU versions
+## VTK can either be built from source or installed via apt.
+###-----------------------------------------------
+##RUN python3 -m pip install "open3d==0.18.0"
+### use rislab's fork till the main Open3D repo fixes Jetson CUDA compilation issues
+### Todo: test without specifying compiler options
+#ARG ORIN_GPU_ARCHITECTURE="72;86;87"
+#RUN python3 -m pip uninstall open3d && \
+#    cd ${HOME}/sdks/ && \
+##    git clone https://github.com/isl-org/Open3D.git && \
+#    git clone https://github.com/rislab/Open3D.git && \
+#    cd Open3D && \
+#    git checkout 8f00080 && \
+#    bash ./util/install_deps_ubuntu.sh assume-yes && \
+#    sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install -y --no-install-recommends \
+#    git xorg-dev libxcb-shm0 libglu1-mesa-dev python3-dev clang libc++-dev libc++abi-dev libsdl2-dev ninja-build libxi-dev libtbb-dev \
+#    libosmesa6-dev libudev-dev autoconf libtool gfortran && sudo rm -rf /var/lib/apt/lists/* && \
+#    mkdir build && cd build && \
+#    export CUDA_HOME=/usr/local/cuda && \
+#    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/targets/aarch64-linux/lib/stubs:/opt/ros/${ROS_DISTRO}/install/lib:$LD_LIBRARY_PATH && \
+#    export CUDACXX=/usr/local/cuda/bin/nvcc && export PATH=/usr/local/cuda/bin:${PATH} && \
+#    export CC=/usr/bin/clang-14 && export CXX=/usr/bin/clang++-14 &&  \
+#    cmake  \
+#      -DBUILD_SHARED_LIBS=ON \
+#      -DWITH_OPENMP=ON \
+#      -DBUILD_CUDA_MODULE=ON \
+#      -DCMAKE_CUDA_ARCHITECTURES=${ORIN_GPU_ARCHITECTURE}  \
+#      -DCUDAToolkit_ROOT=/usr/local/cuda \
+#      -DCMAKE_BUILD_TYPE=Release \
+#      -DBUILD_GUI=OFF \
+#      -DUSE_SYSTEM_VTK=ON -DBUILD_VTK_FROM_SOURCE=OFF \
+#      -DBUILD_PYTORCH_OPS=OFF \
+#      -DBUILD_TENSORFLOW_OPS=OFF \
+#      -DBUNDLE_OPEN3D_ML=OFF \
+#      -DBUILD_LIBREALSENSE=ON \
+#      -DUSE_SYSTEM_LIBREALSENSE=ON \
+#      -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
+#      -DCMAKE_INSTALL_PREFIX=${HOME}/sdks/open3d_install \
+##      -DBUILD_PYTHON_MODULE=ON  \
+#      -DPython3_EXECUTABLE=/usr/bin/python3 \
+#      -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"  --no-warn-unused-cli \
+#      .. && \
+#    make -j$(($(nproc)-1)) && \
+#    sudo apt remove python3-blinker -y && \
+#    make install-pip-package && sudo make install
 
 ##--------------------------------
 ## Install Nvidia Isaac Realsense dependencies
@@ -406,14 +405,14 @@ RUN echo 'alias build="colcon build --symlink-install  --event-handlers console_
 #    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64' >> ~/.bashrc && \
 ##    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/lib/aarch64-linux-gnu/tegra' >> ~/.bashrc && \  # causes libgl issues
 #    echo 'export PATH=${PATH}:/usr/local/cuda/bin' >> ~/.bashrc && \
-    echo 'export PYTHONPATH=${PYTHONPATH}:/usr/local/lib:/usr/lib/python3/dist-packages' >> ~/.bashrc && \
+#    echo 'export PYTHONPATH=${PYTHONPATH}:/usr/local/lib' >> ~/.bashrc && \
 #    echo 'export CUDACXX=/usr/local/cuda/bin/nvcc' >> ~/.bashrc && \
 #    echo 'export ACADOS_ROOT=${HOME}/sdks/acados' >> ~/.bashrc && \
 #    echo 'export ACADOS_PATH=${ACADOS_ROOT}' >> ~/.bashrc && \
 #    echo 'export ACADOS_SOURCE_DIR=${ACADOS_ROOT}' >> ~/.bashrc && \
     echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${ACADOS_ROOT}/lib' >> ~/.bashrc && \
-    echo 'export LD_PRELOAD=${HOME}/sdks/open3d_install/lib/libOpen3D.so' >> ~/.bashrc && \
-    echo "export CCACHE_DIR=/ccache" >> ~/.bashrc  && \
+#    echo 'export LD_PRELOAD=${HOME}/sdks/open3d_install/lib/libOpen3D.so' >> ~/.bashrc && \
+    echo "export CCACHE_DIR=${HOME}/ccache" >> ~/.bashrc  && \
     echo "export CC='/usr/lib/ccache/gcc'" >> ~/.bashrc  && \
     echo "export CXX='/usr/lib/ccache/g++'" >> ~/.bashrc  && \
     echo "export RCUTILS_COLORIZED_OUTPUT=1" >> ~/.bashrc && \
@@ -426,6 +425,22 @@ RUN echo 'alias build="colcon build --symlink-install  --event-handlers console_
 #RUN rm -rf ${HOME}/sdks/librealsense/build ${HOME}/sdks/Open3D/build
 
 ## RUN ros2 doctor # run this if the LIDAR doesn't run (https://github.com/YDLIDAR/ydlidar_ros2_driver/issues/10)
+
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+#RUN useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && \
+#        echo "$USERNAME:$USERNAME" | chpasswd && \
+#        usermod --shell /bin/bash $USERNAME && \
+#        usermod -aG sudo,video,audio,render $USERNAME && \
+#        usermod  --uid $USER_UID $USERNAME && \
+#        echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/$USERNAME && \
+#        chmod 0440 /etc/sudoers.d/$USERNAME
+
+RUN useradd -ms /bin/bash ${USERNAME}
+
+RUN sudo chown -R ${USERNAME} ${HOME}
+# RUN sudo chown -R ${USERNAME} ${HOME}/.cache ${HOME}/.config
 
 ## Todo: remove the lines below in Release/production version
 RUN sudo apt update && sudo apt install gedit cheese nautilus net-tools iputils-ping nano -y
