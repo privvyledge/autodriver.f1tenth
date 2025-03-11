@@ -13,6 +13,11 @@ sudo apt-get update && sudo apt-get install openssh-server && echo "Installed SS
 sudo apt update && sudo apt install -y python3-dev python3-pip python3-setuptools python3-venv build-essential git curl nano cmake  && echo "Installation common dependencies"  # common dependencies
 sudo pip3 install -U jetson-stats && echo "Installed jtop"  # jtop
 
+# Install VCS tool (if not installing ROS on the host)
+curl -s https://packagecloud.io/install/repositories/dirk-thomas/vcstool/script.deb.sh | sudo bash
+sudo apt-get update
+sudo apt-get install python3-vcstool
+
 # Install Docker. Comment out this block if installed using the sd card method or if docker is already installed.
 # Thanks to Jetsonhacks (https://github.com/jetsonhacks/install-docker and https://jetsonhacks.com/2025/02/24/docker-setup-on-jetpack-6-jetson-orin/)
 # ### Begin: Docker installation block
@@ -58,7 +63,14 @@ rm docker_install.sh
 sudo systemctl --now enable docker
 
 # Configure NVIDIA Container Toolkit.
-sudo nvidia-ctk runtime configure --runtime=docker
+sudo nvidia-ctk cdi generate --mode=csv --output=/etc/cdi/nvidia.yaml  # Generate CDI Spec for GPU/PVA
+sudo nvidia-ctk runtime configure --runtime=docker --cdi.enabled=true
+sudo systemctl restart docker
+sudo apt-get update
+sudo apt-get install software-properties-common
+#sudo apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
+#sudo add-apt-repository 'deb https://repo.download.nvidia.com/jetson/common r36.4 main'
+sudo apt update && sudo apt-get install -y pva-allow-2
 echo "Installed docker"
 # ### End: Docker installation block
 
