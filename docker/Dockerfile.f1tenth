@@ -50,7 +50,7 @@ RUN sudo apt-get update -y && DEBIAN_FRONTEND="noninteractive" sudo apt-get inst
     python3.10 \
     python3.10-venv \
     python3-pip \
-    python3-setuptools \
+#    python3-setuptools \
 #    python3-numpy \
     python3-rosdep \
 #    python3-matplotlib \
@@ -95,7 +95,7 @@ RUN sudo apt-get update -y && DEBIAN_FRONTEND="noninteractive" sudo apt-get inst
     sudo rm -rf /var/lib/apt/lists/*
 
 # Update pip and Set Python3 as default then install Controls related python packages
-RUN python3 -m pip install -U pip setuptools wheel && \
+RUN python3 -m pip install -U pip wheel && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
     python3 -m pip install transforms3d numpy control "do-mpc==4.6.5" "casadi==3.6.7" "kornia==0.8.0" networkx pyserial
 
