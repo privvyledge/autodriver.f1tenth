@@ -323,15 +323,34 @@ RUN sudo apt-get update && \
 #    sudo apt remove python3-blinker -y && \
 #    make install-pip-package && sudo make install
 
-##--------------------------------
-## Install Nvidia Isaac Realsense dependencies
-## Note: do not install "ros-${ROS_DISTRO}-isaac-ros-realsense" as it installs realsense libraries which causes realsense failure.
-##--------------------------------
-#RUN sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install -y --no-install-recommends \
-#    ros-humble-gxf-isaac-depth-image-proc ros-humble-gxf-isaac-point-cloud ros-humble-gxf-isaac-ros-messages \
-#    ros-humble-gxf-isaac-sgm ros-humble-gxf-isaac-utils \
-#    ros-humble-isaac-ros-stereo-image-proc ros-humble-isaac-ros-depth-image-proc \
-#    ros-humble-isaac-ros-nitros-disparity-image-type ros-humble-isaac-ros-nitros-point-cloud-type
+#--------------------------------
+# Install Nvidia Isaac Realsense dependencies and other Isaac ROS packages
+# Note: do not install "ros-${ROS_DISTRO}-isaac-ros-realsense" as it installs realsense libraries which causes realsense failure.
+#--------------------------------
+RUN sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install -y --no-install-recommends \
+    ros-${ROS_DISTRO}-gxf-isaac-depth-image-proc \
+    ros-${ROS_DISTRO}-isaac-ros-image-proc \
+    ros-${ROS_DISTRO}-gxf-isaac-point-cloud \
+    ros-${ROS_DISTRO}-gxf-isaac-ros-messages \
+    ros-${ROS_DISTRO}-gxf-isaac-sgm \
+    ros-${ROS_DISTRO}-gxf-isaac-utils \
+    ros-${ROS_DISTRO}-isaac-ros-stereo-image-proc \
+    ros-${ROS_DISTRO}-isaac-ros-depth-image-proc \
+    ros-${ROS_DISTRO}-isaac-ros-nitros-disparity-image-type \
+    ros-${ROS_DISTRO}-isaac-ros-nitros-point-cloud-type \
+    ros-${ROS_DISTRO}-isaac-ros-visual-slam \
+    ros-${ROS_DISTRO}-isaac-ros-nvblox \
+    ros-${ROS_DISTRO}-isaac-ros-apriltag \
+    ros-${ROS_DISTRO}-isaac-ros-occupancy-grid-localizer \
+    ros-${ROS_DISTRO}-isaac-mapping-ros \
+    ros-${ROS_DISTRO}-isaac-ros-visual-global-localization \
+    ros-${ROS_DISTRO}-isaac-ros-detectnet ros-humble-isaac-ros-dnn-image-encoder ros-humble-isaac-ros-triton \
+    ros-${ROS_DISTRO}-isaac-ros-rtdetr \
+    ros-${ROS_DISTRO}-isaac-ros-yolov8 \
+    ros-${ROS_DISTRO}-isaac-ros-dnn-image-encoder \
+    ros-${ROS_DISTRO}-isaac-ros-tensor-rt \
+    ros-${ROS_DISTRO}-isaac-ros-examples && sudo rm -rf /var/lib/apt/lists/* \
+    && sudo apt-get clean
 
 ## Update environment
 #RUN update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-14 14
@@ -359,12 +378,15 @@ ENV SKIPPED_ROSDEP_KEYS="cmake_modules pacmod3_msgs  python3-open3d open3d \
 
 ################# Temporarily pull all the packages and install dependencies then delete to save space
 RUN mkdir -p ${HOME}/f1tenth_ws/src && cd ${HOME}/f1tenth_ws/src &&  \
-    git clone https://github.com/privvyledge/autodriver.f1tenth.git -b f1tenth_humble && \
-    vcs import --recursive --workers 6 src < src/autodriver.f1tenth/f1tenth.repos && \
+    git clone https://github.com/privvyledge/autodriver.f1tenth.git -b master && \
+    cd ${HOME}/f1tenth_ws && vcs import --recursive --workers 6 src < src/autodriver.f1tenth/f1tenth.repos && \
     sudo apt update && rosdep update && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
     rosdep install --from-paths src --ignore-src -r -y -q --os=ubuntu:jammy --rosdistro=humble --skip-keys "${SKIPPED_ROSDEP_KEYS}" && \
     cd ${HOME} && rm -rf ${HOME}/f1tenth_ws
+
+######## (optional) Disable git warnings. Or downgrade to version setuptools_scm==5.0.0
+RUN python3 -m pip uninstall -y setuptools-scm
 
 #RUN sudo apt update && \
 #    rosdep update && \
