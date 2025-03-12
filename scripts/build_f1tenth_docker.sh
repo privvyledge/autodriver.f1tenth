@@ -25,7 +25,7 @@ git clone -b release-3.2 https://github.com/privvyledge/isaac_ros_common.git isa
 cd ${ISAAC_ROS_WS}/src/isaac_ros_common/scripts && touch .isaac_ros_common-config && echo -e "CONFIG_IMAGE_KEY=ros2_humble.realsense.f1tenth\nCONFIG_DOCKER_SEARCH_DIRS=(../../autodriver.f1tenth/docker ../docker)" > .isaac_ros_common-config  # 70 minutes total
 
 # Pull the repositories
-cd ${ISAAC_ROS_WS} && vcs import --recursive --workers 1 src < src/autodriver.f1tenth/f1tenth.repos
+cd ${ISAAC_ROS_WS} && vcs import --recursive --workers 6 src < src/autodriver.f1tenth/f1tenth.repos
 
 mkdir -p ${HOME}/shared_dir ${HOME}/data
 cd ${ISAAC_ROS_WS}/src/isaac_ros_common/scripts
@@ -33,6 +33,9 @@ echo -e "-v /dev:/dev\n-v ${HOME}/shared_dir:/mnt/shared_dir\n-v ${HOME}/data:/m
 
 # Run the container
 cd ${ISAAC_ROS_WS}/src/isaac_ros_common/ && ./scripts/run_dev.sh -d $ISAAC_ROS_WS
+
+## Run the container without rebuilding, e.g Offline usage
+#cd ${ISAAC_ROS_WS}/src/isaac_ros_common/ && ./scripts/run_dev.sh -d $ISAAC_ROS_WS --skip_image_build
 
 ## Run the below commands in the container
 #cd /workspaces/isaac_ros-dev

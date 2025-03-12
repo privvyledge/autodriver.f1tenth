@@ -129,6 +129,7 @@ RUN sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install
     ros-${ROS_DISTRO}-nav2-bringup \
     ros-${ROS_DISTRO}-slam-toolbox \
     ros-${ROS_DISTRO}-robot-localization \
+    ros-${ROS_DISTRO}-spatio-temporal-voxel-layer \
     ros-${ROS_DISTRO}-imu-tools \
     ros-${ROS_DISTRO}-filters \
     ros-${ROS_DISTRO}-image-pipeline \
@@ -356,14 +357,15 @@ RUN sudo apt-get update && \
 ENV SKIPPED_ROSDEP_KEYS="cmake_modules pacmod3_msgs  python3-open3d open3d \
     librealsense2 realsense2_camera libopencv-dev  libopencv-contrib-dev libopencv-imgproc-dev python-opencv python3-opencv"
 
-################# Temporarily setup autoware f1tenth_humble branch. todo: remove
-#RUN cd $BUILD_HOME/src && rm -rf autoware.f1tenth && rm -rf f1tenth_autoware_launch_py && \
-#    git clone https://github.com/autowarefoundation/autoware.git -b f1tenth_humble && cd autoware && mkdir src  && \
-#    vcs import src < autoware.repos
+################# Temporarily pull all the packages and install dependencies then delete to save space
+RUN mkdir -p ${HOME}/f1tenth_ws/src && cd ${HOME}/f1tenth_ws/src &&  \
+    git clone https://github.com/privvyledge/autodriver.f1tenth.git -b f1tenth_humble && \
+    vcs import --recursive --workers 6 src < src/autodriver.f1tenth/f1tenth.repos && \
+    sudo apt update && rosdep update && \
+    source /opt/ros/${ROS_DISTRO}/setup.bash && \
+    rosdep install --from-paths src --ignore-src -r -y -q --os=ubuntu:jammy --rosdistro=humble --skip-keys "${SKIPPED_ROSDEP_KEYS}" && \
+    cd ${HOME} && rm -rf ${HOME}/f1tenth_ws
 
-######### (optional) Disable git warnings. Or downgrade to version setuptools_scm==5.0.0
-#RUN python3 -m pip uninstall -y setuptools-scm
-#
 #RUN sudo apt update && \
 #    rosdep update && \
 #    source /opt/ros/${ROS_DISTRO}/setup.bash && \
@@ -425,17 +427,6 @@ RUN echo 'alias build="colcon build --symlink-install  --event-handlers console_
 #RUN rm -rf ${HOME}/sdks/librealsense/build ${HOME}/sdks/Open3D/build
 
 ## RUN ros2 doctor # run this if the LIDAR doesn't run (https://github.com/YDLIDAR/ydlidar_ros2_driver/issues/10)
-
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-
-#RUN useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && \
-#        echo "$USERNAME:$USERNAME" | chpasswd && \
-#        usermod --shell /bin/bash $USERNAME && \
-#        usermod -aG sudo,video,audio,render $USERNAME && \
-#        usermod  --uid $USER_UID $USERNAME && \
-#        echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/$USERNAME && \
-#        chmod 0440 /etc/sudoers.d/$USERNAME
 
 RUN useradd -ms /bin/bash ${USERNAME}
 
