@@ -371,15 +371,6 @@ RUN mkdir -p ${HOME}/f1tenth_ws/src && cd ${HOME}/f1tenth_ws/src &&  \
 #    source /opt/ros/${ROS_DISTRO}/setup.bash && \
 #    rosdep install --from-paths src --ignore-src -r -y -q --os=ubuntu:jammy --rosdistro=humble --skip-keys "${SKIPPED_ROSDEP_KEYS}"
 
-########### (optional since compilation is still successfull without it as most/if not all dependencies are installed) install Autoware dependencies. Could skip keys as well
-#RUN cd $BUILD_HOME/src/autoware.f1tenth && \
-#    rosdep keys --ignore-src --from-paths src | xargs rosdep resolve --rosdistro ${ROS_DISTRO} | grep -v '^#' | sed 's/ \+/\n/g' | sort > $BUILD_HOME/src/autoware.f1tenth/rosdep-all-depend-packages.txt && \
-#    rosdep keys --dependency-types=exec --ignore-src --from-paths src | xargs rosdep resolve --rosdistro ${ROS_DISTRO} | grep -v '^#' | sed 's/ \+/\n/g' | sort > $BUILD_HOME/src/autoware.f1tenth/rosdep-exec-depend-packages.txt && \
-#    cat $BUILD_HOME/src/autoware.f1tenth/rosdep-all-depend-packages.txt | xargs apt-get install -y --no-install-recommends && \
-#    cat $BUILD_HOME/src/autoware.f1tenth/rosdep-exec-depend-packages.txt | xargs apt-get install -y --no-install-recommends && \
-#    apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* "$HOME"/.cache && \
-#    rm $BUILD_HOME/src/autoware.f1tenth/rosdep-all-depend-packages.txt $BUILD_HOME/src/autoware.f1tenth/rosdep-exec-depend-packages.txt
-
 ############ Build ROS2 workspace
 #RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
 #    colcon build --symlink-install --event-handlers console_direct+ --base-paths src --cmake-args \
