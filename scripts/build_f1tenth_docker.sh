@@ -16,7 +16,7 @@ git lfs install --skip-repo
 
 # Create the ROS2 workspace
 mkdir -p ~/f1tenth_ws/src
-echo "export ISAAC_ROS_WS=$HOME/f1tenth_ws" >> ~/.bashrc && export ISAAC_ROS_WS=$HOME/f1tenth_ws && echo "export ROS_WS=$HOME/f1tenth_ws" >> ~/.bashrc && echo "export ROS2_WS=$HOME/f1tenth_ws" >> ~/.bashrc && source ~/.bashrc
+echo "export ISAAC_ROS_WS=$HOME/f1tenth_ws" >> ~/.bashrc && echo "export ROS_WS=$HOME/f1tenth_ws" >> ~/.bashrc && echo "export ROS2_WS=$HOME/f1tenth_ws" >> ~/.bashrc && source ~/.bashrc && export ISAAC_ROS_WS=$HOME/f1tenth_ws
 
 cd ${ISAAC_ROS_WS}/src
 git clone -b release-3.2 https://github.com/privvyledge/isaac_ros_common.git isaac_ros_common
@@ -62,20 +62,20 @@ cd ${ISAAC_ROS_WS}/src/isaac_ros_common/ && ./scripts/run_dev.sh -d $ISAAC_ROS_W
 #   --ros_ws ${ISAAC_ROS_WS}  \
 #   --launch_package "f1tenth_launch" \
 #   --launch_file "isaac_ros_image_flip.launch.py" \
-#   --name "privvyledge/f1tenth/humble:latest"
+#   --name "privvyledge/f1tenth:humble-latest"
 
-# Deploy the docker images into one ready to transfer/deploy image. Colcon packages must be build without --symlink-install
+# Deploy the docker images into one ready t transfer/deploy image. Colcon packages must be build without --symlink-install
 ${ISAAC_ROS_WS}/src/isaac_ros_common/scripts/docker_deploy.sh \
    --base_image_key "aarch64.ros2_humble.realsense.f1tenth" \
    --ros_ws ${ISAAC_ROS_WS}  \
-   --name "privvyledge/f1tenth/humble:latest"
+   --name "privvyledge/f1tenth:humble-latest"
 
-# Run using Jetson containers
-xhost +local:root && \
-  jetson-containers run -v /dev:/dev -v ${HOME}/shared_dir:/mnt/shared_dir \
-  -v ${HOME}/data:/mnt/data --ipc host --env="QT_X11_NO_MITSHM=1" --privileged \
-  privvyledge/f1tenth/humble:latest /bin/bash && \
-  xhost -local:root
+## Run using Jetson containers
+#xhost +local:root && \
+#  jetson-containers run -v /dev:/dev -v ${HOME}/shared_dir:/mnt/shared_dir \
+#  -v ${HOME}/data:/mnt/data --ipc host --env="QT_X11_NO_MITSHM=1" --privileged \
+#  privvyledge/f1tenth:humble-latest /bin/bash && \
+#  xhost -local:root
 
 ## Or Run without Jetson containers
 #xhost +local:root && \
@@ -86,6 +86,6 @@ xhost +local:root && \
 #  -e DISPLAY=$DISPLAY \
 #  -v $HOME/.Xauthority:/home/admin/.Xauthority:rw \
 #  --env="QT_X11_NO_MITSHM=1" \
-#  privvyledge/f1tenth/humble:latest /bin/bash && \
+#  privvyledge/f1tenth:humble-latest /bin/bash && \
 #  xhost -local:root
 

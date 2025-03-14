@@ -102,7 +102,7 @@ echo "Allocated 16GB Swap memory."
 
 sudo systemctl disable nvargus-daemon.service  && echo "Disabled misc services"
 
-sudo systemctl set-default multi-user.target  && echo "Disabled desktop GUI"  # Disable desktop GUI. `sudo systemctl set-default graphical.target` to reenable.
+#sudo systemctl set-default multi-user.target  && echo "Disabled desktop GUI"  # Disable desktop GUI. `sudo systemctl set-default graphical.target` to reenable.
 
 sudo apt-get install -y joystick jstest-gtk  && echo "Installed joystick support"
 
@@ -128,8 +128,8 @@ sudo udevadm control --reload-rules && sudo udevadm trigger && echo "Reloaded UD
 cd ~/Downloads && git clone https://github.com/dusty-nv/jetson-containers && bash jetson-containers/install.sh
 
 # (optional) Add Logitech F710 support
-sudo apt-get install dkms
-sudo dkms remove -m xpad -v 0.4 --all
+sudo apt-get install -y dkms
+#sudo dkms remove -m xpad -v 0.4 --all
 sudo git clone https://github.com/paroj/xpad.git /usr/src/xpad-0.4 && sudo dkms install -m xpad -v 0.4
 
 echo "Installation complete"
