@@ -43,11 +43,13 @@ cd ${ISAAC_ROS_WS}/src/isaac_ros_common/ && ./scripts/run_dev.sh -d $ISAAC_ROS_W
 
 ##### Deployment
 #### Method1: for more detailed deployment. Use the deploy_docker_image.sh script
+#mv "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config.bak
 #"${ISAAC_ROS_WS}"/src/autodriver.f1tenth/scripts/deploy_docker_image.sh \
 #  --ws-src "${ISAAC_ROS_WS}"/src \
 #  --isaac-ros-common "${ISAAC_ROS_WS}"/src/isaac_ros_common \
-#  --docker-tags "ros2_humble.realsense.f1tenth.deploy" \
+#  --docker-tags "ros2_humble.realsense.f1tenth.deploy_custom" \
 #  --image-name "privvyledge/f1tenth/humble:latest"
+#mv "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config.bak "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config
 
 ### Method 2: Using Nvidia Isaac ROS. Not recommended as it does not copy environment variables
 # To add more options to the deployment script (https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_common/index.html#api-docker-deploy-sh)
