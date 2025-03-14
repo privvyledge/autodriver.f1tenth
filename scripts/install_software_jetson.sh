@@ -18,49 +18,11 @@ curl -s https://packagecloud.io/install/repositories/dirk-thomas/vcstool/script.
 sudo apt-get update
 sudo apt-get install python3-vcstool
 
-# Install Docker. Comment out this block if installed using the sd card method or if docker is already installed.
-# Thanks to Jetsonhacks (https://github.com/jetsonhacks/install-docker and https://jetsonhacks.com/2025/02/24/docker-setup-on-jetpack-6-jetson-orin/)
-# ### Begin: Docker installation block
-sudo apt update && sudo apt install -y nvidia-container
-
-sudo apt update
-
-# Download the Docker installation script.
-wget https://get.docker.com -O docker_install.sh
-
-# Check if the Docker installation script was downloaded successfully and is not empty.
-if [ ! -s docker_install.sh ]; then
-  echo "ERROR: Docker installation script download failed or file is empty."
-  rm -f docker_install.sh  # Clean up any partial download.
-  exit 1  # Exit with an error code.
-fi
-
-# Make the Docker installation script executable.
-chmod +x docker_install.sh
-
-# Install Docker.
-sudo ./docker_install.sh
-
-# An issue with the current Docker 28.0.0 requires a different set of kernel modules to be enabled.
-# The JetPack 6.2 release of Jetson doesn't support these. So we downgrade
-sudo apt-get install -y docker-ce=5:27.5.1-1~ubuntu.22.04~jammy --allow-downgrades
-sudo apt-get install -y docker-ce-cli=5:27.5.1-1~ubuntu.22.04~jammy --allow-downgrades
-sudo apt-get install -y docker-compose-plugin=2.32.4-1~ubuntu.22.04~jammy --allow-downgrades
-sudo apt-get install -y docker-buildx-plugin=0.20.0-1~ubuntu.22.04~jammy --allow-downgrades
-sudo apt-get install -y docker-ce-rootless-extras=5:27.5.1-1~ubuntu.22.04~jammy --allow-downgrades
-
-
-# The we mark them held so they do not get upgraded with apt upgrade
-sudo apt-mark hold docker-ce=5:27.5.1-1~ubuntu.22.04~jammy
-sudo apt-mark hold docker-ce-cli=5:27.5.1-1~ubuntu.22.04~jammy
-sudo apt-mark hold docker-compose-plugin=2.32.4-1~ubuntu.22.04~jammy
-sudo apt-mark hold docker-buildx-plugin=0.20.0-1~ubuntu.22.04~jammy
-sudo apt-mark hold docker-ce-rootless-extras=5:27.5.1-1~ubuntu.22.04~jammy
-
-rm docker_install.sh
-
-# Enable and start the Docker service.
-sudo systemctl --now enable docker
+## Install Docker. Comment out this block if installed using the sd card method or if docker is already installed.
+## Thanks to Jetsonhacks (https://github.com/jetsonhacks/install-docker and https://jetsonhacks.com/2025/02/24/docker-setup-on-jetpack-6-jetson-orin/)
+## ### Begin: Docker installation block
+#./install_nvidia_docker.sh
+## ### End: Docker installation block
 
 # Configure NVIDIA Container Toolkit.
 sudo nvidia-ctk cdi generate --mode=csv --output=/etc/cdi/nvidia.yaml  # Generate CDI Spec for GPU/PVA
@@ -72,7 +34,6 @@ sudo apt-get install software-properties-common
 #sudo add-apt-repository 'deb https://repo.download.nvidia.com/jetson/common r36.4 main'
 sudo apt update && sudo apt-get install -y pva-allow-2
 echo "Installed docker"
-# ### End: Docker installation block
 
 ## Restart the docker service and add our user to the docker group to use without sudo. Must be done outside this script as it causes the script to exit.
 #sudo systemctl restart docker && sudo usermod -aG docker $USER && newgrp docker && echo "Added user to docker group."
