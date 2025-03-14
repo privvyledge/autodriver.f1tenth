@@ -97,7 +97,12 @@ RUN sudo apt-get update -y && DEBIAN_FRONTEND="noninteractive" sudo apt-get inst
 # Update pip and Set Python3 as default then install Controls related python packages
 RUN python3 -m pip install -U pip wheel && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    python3 -m pip install transforms3d "numpy==1.26.4" control "do-mpc==4.6.5" "casadi==3.6.7" "kornia==0.8.0" networkx pyserial
+    python3 -m pip install \
+    transforms3d \
+    "numpy==1.26.4" \
+    "control==0.10.1" "simple-pid==2.0.0" \
+    "do-mpc==4.6.5" "casadi==3.6.7" \
+    "kornia==0.8.0" networkx pyserial
 
 ## Initialize ROS workspace
 #ENV BUILD_HOME=/f1tenth_ws
@@ -382,7 +387,7 @@ RUN mkdir -p ${HOME}/f1tenth_ws/src && cd ${HOME}/f1tenth_ws/src &&  \
     cd ${HOME}/f1tenth_ws && vcs import --recursive --workers 6 src < src/autodriver.f1tenth/f1tenth.repos && \
     sudo apt update && rosdep update && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    rosdep install --from-paths src --ignore-src -r -y -q --os=ubuntu:jammy --rosdistro=humble --skip-keys "${SKIPPED_ROSDEP_KEYS}" && \
+    rosdep install --from-paths src --ignore-src -r -y -q --os=ubuntu:jammy --rosdistro=${ROS_DISTRO} --skip-keys "${SKIPPED_ROSDEP_KEYS}" && \
     cd ${HOME} && rm -rf ${HOME}/f1tenth_ws
 
 ######## (optional) Disable git warnings. Or downgrade to version setuptools_scm==5.0.0
@@ -394,47 +399,35 @@ RUN python3 -m pip uninstall -y setuptools-scm
 #    rosdep install --from-paths src --ignore-src -r -y -q --os=ubuntu:jammy --rosdistro=humble --skip-keys "${SKIPPED_ROSDEP_KEYS}"
 
 ############ Build ROS2 workspace
-#RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
-#    colcon build --symlink-install --event-handlers console_direct+ --base-paths src --cmake-args \
-#    ' -Wno-dev' ' --no-warn-unused-cli' \
-#    ' -DBUILD_ACCELERATE_GPU_WITH_GLSL=ON' \
-#    ' -DCMAKE_BUILD_TYPE=Release' ' -DCMAKE_EXPORT_COMPILE_COMMANDS=ON' \
-#    ' -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
-#    ' -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"  -DDOWNLOAD_ARTIFACTS=ON' \
-#    --mixin release compile-commands ccache
+RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+    colcon build --symlink-install --event-handlers console_direct+ --base-paths src --cmake-args \
+    ' -Wno-dev' ' --no-warn-unused-cli' \
+    ' -DBUILD_ACCELERATE_GPU_WITH_GLSL=ON' \
+    ' -DCMAKE_BUILD_TYPE=Release' ' -DCMAKE_EXPORT_COMPILE_COMMANDS=ON' \
+    ' -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
+    ' -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"' \
+    --mixin release compile-commands ccache
 
 #-----------------------------
-# Setup environment variables
+# Setup environment variables. Use ENV to avoid creating docker layers
 #-----------------------------
-# Todo: use ENV to modify PATHs, e.g PATH, PYTHONPATH, LD_LIBRARY_PATH
-# Todo: add autoware environment variables like vehicle_id
-RUN echo 'alias build="colcon build --symlink-install  --event-handlers console_direct+"' >> ~/.bashrc && \
-#    echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >> ~/.bashrc && \
-#    echo "source ${BUILD_HOME}/install/setup.bash" >> ~/.bashrc && \
-    echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc && \
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib:${ACADOS_ROOT}/lib \
+    CCACHE_DIR=${HOME}/ccache \
+    CC=/usr/lib/ccache/gcc \
+    CXX=/usr/lib/ccache/g++ \
+    RCUTILS_COLORIZED_OUTPUT=1 \
+    RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})" \
+    _colcon_cd_root=${ROS_ROOT}
+
+RUN echo 'alias build="colcon build --symlink-install --event-handlers console_direct+"' >> /etc/bash.bashrc && \
+    echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> /etc/bash.bashrc
+
+# RUN echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >> ~/.bashrc && \
 ##    echo "export RMW_IMPLEMENTATION=rmw_fastrtps_cpp" >> ~/.bashrc && \
 #    echo "export CYCLONEDDS_URI=file://$BUILD_HOME/src/autoware.f1tenth/cyclone_dds/cyclonedds_config.xml" >> ~/.bashrc && \
 #    echo "export FASTRTPS_DEFAULT_PROFILES_FILE=$BUILD_HOME/src/autoware.f1tenth/fast_dds/fastdds_profile.xml" >> ~/.bashrc && \
-#    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda/targets/aarch64-linux/lib/stubs:/opt/ros/${ROS_DISTRO}/install/lib' >> ~/.bashrc && \
-    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib' >> ~/.bashrc && \
-#    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64' >> ~/.bashrc && \
-##    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/lib/aarch64-linux-gnu/tegra' >> ~/.bashrc && \  # causes libgl issues
-#    echo 'export PATH=${PATH}:/usr/local/cuda/bin' >> ~/.bashrc && \
-#    echo 'export PYTHONPATH=${PYTHONPATH}:/usr/local/lib' >> ~/.bashrc && \
-#    echo 'export CUDACXX=/usr/local/cuda/bin/nvcc' >> ~/.bashrc && \
-#    echo 'export ACADOS_ROOT=${HOME}/sdks/acados' >> ~/.bashrc && \
-#    echo 'export ACADOS_PATH=${ACADOS_ROOT}' >> ~/.bashrc && \
-#    echo 'export ACADOS_SOURCE_DIR=${ACADOS_ROOT}' >> ~/.bashrc && \
-    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${ACADOS_ROOT}/lib' >> ~/.bashrc && \
-#    echo 'export LD_PRELOAD=${HOME}/sdks/open3d_install/lib/libOpen3D.so' >> ~/.bashrc && \
-    echo "export CCACHE_DIR=${HOME}/ccache" >> ~/.bashrc  && \
-    echo "export CC='/usr/lib/ccache/gcc'" >> ~/.bashrc  && \
-    echo "export CXX='/usr/lib/ccache/g++'" >> ~/.bashrc  && \
-    echo "export RCUTILS_COLORIZED_OUTPUT=1" >> ~/.bashrc && \
-    echo 'export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})"' >> ~/.bashrc && \
-    echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> ~/.bashrc && \
-    echo "export _colcon_cd_root=${ROS_ROOT}" >> ~/.bashrc && \
-    echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+#    echo 'export LD_PRELOAD=${HOME}/sdks/open3d_install/lib/libOpen3D.so' >> ~/.bashrc
 
 ##RUN sudo rm -rf ${HOME}/sdks/
 #RUN rm -rf ${HOME}/sdks/librealsense/build ${HOME}/sdks/Open3D/build

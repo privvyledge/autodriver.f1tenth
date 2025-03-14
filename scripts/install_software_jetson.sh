@@ -124,5 +124,8 @@ echo "Setup Logitech F710 Joystick UDEV rules"
 
 sudo udevadm control --reload-rules && sudo udevadm trigger && echo "Reloaded UDEV rules"  # reload UDEV rules
 
+# Install jetson-containers
+cd /tmp && git clone https://github.com/dusty-nv/jetson-containers && bash jetson-containers/install.sh
+
 echo "Installation complete"
 exit 0
