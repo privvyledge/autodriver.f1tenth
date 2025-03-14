@@ -398,15 +398,15 @@ RUN python3 -m pip uninstall -y setuptools-scm
 #    source /opt/ros/${ROS_DISTRO}/setup.bash && \
 #    rosdep install --from-paths src --ignore-src -r -y -q --os=ubuntu:jammy --rosdistro=humble --skip-keys "${SKIPPED_ROSDEP_KEYS}"
 
-############ Build ROS2 workspace
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    colcon build --symlink-install --event-handlers console_direct+ --base-paths src --cmake-args \
-    ' -Wno-dev' ' --no-warn-unused-cli' \
-    ' -DBUILD_ACCELERATE_GPU_WITH_GLSL=ON' \
-    ' -DCMAKE_BUILD_TYPE=Release' ' -DCMAKE_EXPORT_COMPILE_COMMANDS=ON' \
-    ' -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
-    ' -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"' \
-    --mixin release compile-commands ccache
+############# Build ROS2 workspace
+#RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+#    colcon build --symlink-install --event-handlers console_direct+ --base-paths src --cmake-args \
+#    ' -Wno-dev' ' --no-warn-unused-cli' \
+#    ' -DBUILD_ACCELERATE_GPU_WITH_GLSL=ON' \
+#    ' -DCMAKE_BUILD_TYPE=Release' ' -DCMAKE_EXPORT_COMPILE_COMMANDS=ON' \
+#    ' -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
+#    ' -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"' \
+#    --mixin release compile-commands ccache
 
 #-----------------------------
 # Setup environment variables. Use ENV to avoid creating docker layers
