@@ -64,12 +64,18 @@ if [ -n "$HOST_USER_UID" ] && [ -n "$HOST_USER_GID" ]; then
     # Source ROS workspace if exists
     if [[ ! -z "${ROS_WS}" ]]; then
         source ${ROS_WS}/install/setup.bash
-        # echo "ROS workspace sourced: ${ROS_WS}"
+         echo "ROS workspace sourced: ${ROS_WS}"
     fi
 
     # Execute command
     exec gosu ${USERNAME} "$@"
 
+fi
+
+# Source ROS workspace if exists
+if [[ ! -z "${ROS_WS}" ]]; then
+    source ${ROS_WS}/install/setup.bash
+     echo "ROS workspace sourced: ${ROS_WS}"
 fi
 
 # Execute command as root if HOST_USER_UID and HOST_USER_GID are not set

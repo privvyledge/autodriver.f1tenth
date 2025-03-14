@@ -125,7 +125,12 @@ echo "Setup Logitech F710 Joystick UDEV rules"
 sudo udevadm control --reload-rules && sudo udevadm trigger && echo "Reloaded UDEV rules"  # reload UDEV rules
 
 # Install jetson-containers
-cd /tmp && git clone https://github.com/dusty-nv/jetson-containers && bash jetson-containers/install.sh
+cd ~/Downloads && git clone https://github.com/dusty-nv/jetson-containers && bash jetson-containers/install.sh
+
+# (optional) Add Logitech F710 support
+sudo apt-get install dkms
+sudo dkms remove -m xpad -v 0.4 --all
+sudo git clone https://github.com/paroj/xpad.git /usr/src/xpad-0.4 && sudo dkms install -m xpad -v 0.4
 
 echo "Installation complete"
 exit 0
