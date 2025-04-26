@@ -166,6 +166,7 @@ ENV SDK_ROOT=${HOME}/sdks
 ARG ACADOS_VERSION=v0.4.3
 ARG TX2_ARCHITECTURE=ARMV8A_ARM_CORTEX_A57
 ARG ORIN_ARCHITECTURE=ARMV8A_ARM_CORTEX_A76
+ARG DESKTOP_ARCHITECTURE="X64_AUTOMATIC"
 ARG ACADO_BLASFEO_TARGET_CPU_ARCHITECHTURE=${ORIN_ARCHITECTURE}
 ARG ACADOS_OPENMP_PARALLELIZATION_ENABLED=ON
 ARG ACADOS_NUM_THREADS=2
@@ -181,7 +182,7 @@ RUN mkdir -p ${HOME}/sdks && cd ${HOME}/sdks && \
         -DACADOS_WITH_QPOASES=ON \
         -DACADOS_WITH_OSQP=ON \
         -DACADOS_INSTALL_DIR=${HOME}/sdks/acados \
-        -DBLASFEO_TARGET=${ACADO_BLASFEO_TARGET_CPU_ARCHITECHTURE} \
+#        -DBLASFEO_TARGET=${ACADO_BLASFEO_TARGET_CPU_ARCHITECHTURE} \
         -DCMAKE_BUILD_TYPE=Release \
         -DACADOS_NUM_THREADS=${ACADOS_NUM_THREADS} \
         -DACADOS_WITH_OPENMP=${ACADOS_OPENMP_PARALLELIZATION_ENABLED} .. && \
@@ -438,6 +439,13 @@ RUN useradd -ms /bin/bash ${USERNAME}
 
 RUN sudo chown -R ${USERNAME} ${HOME}
 # RUN sudo chown -R ${USERNAME} ${HOME}/.cache ${HOME}/.config
+RUN mkdir -p /workspaces/f1tenth && sudo chown -R ${USERNAME} /workspaces
+RUN sudo chown -R ${USERNAME} /workspaces
+RUN sudo chown -R ${USERNAME} /workspaces/f1tenth
 
-## Todo: remove the lines below in Release/production version
-RUN sudo apt update && sudo apt install gedit cheese nautilus net-tools iputils-ping nano -y
+WORKDIR /workspaces/f1tenth
+
+### Todo: remove the lines below in Release/production version
+#RUN sudo apt update && sudo apt install gedit cheese nautilus net-tools iputils-ping nano -y
+
+CMD ["/bin/bash"]

@@ -16,7 +16,7 @@ git lfs install --skip-repo
 
 # Create the ROS2 workspace
 mkdir -p ~/f1tenth_ws/src
-echo "export ISAAC_ROS_WS=$HOME/f1tenth_ws" >> ~/.bashrc && echo "export ROS_WS=$HOME/f1tenth_ws" >> ~/.bashrc && echo "export ROS2_WS=$HOME/f1tenth_ws" >> ~/.bashrc && source ~/.bashrc && export ISAAC_ROS_WS=$HOME/f1tenth_ws
+echo "export ISAAC_ROS_WS=$HOME/f1tenth_ws" >> ~/.bashrc && export ISAAC_ROS_WS=$HOME/f1tenth_ws && echo "export ROS_WS=$HOME/f1tenth_ws" >> ~/.bashrc && echo "export ROS2_WS=$HOME/f1tenth_ws" >> ~/.bashrc && source ~/.bashrc
 
 cd ${ISAAC_ROS_WS}/src
 git clone -b release-3.2 https://github.com/privvyledge/isaac_ros_common.git isaac_ros_common
@@ -42,19 +42,17 @@ cd ${ISAAC_ROS_WS}/src/isaac_ros_common/ && ./scripts/run_dev.sh -d $ISAAC_ROS_W
 #cd ${ISAAC_ROS_WS}/src/isaac_ros_common/ && ./scripts/run_dev.sh --docker_arg "-e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp -e VEHICLE_NAME=${VEHICLE_NAME} --env QT_X11_NO_MITSHM=1"
 
 ##### Deployment
-#### Method1: for more detailed deployment. Use the deploy_docker_image.sh script
-#mv "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config.bak
-#"${ISAAC_ROS_WS}"/src/autodriver.f1tenth/scripts/deploy_docker_image.sh \
-#  --ws-src "${ISAAC_ROS_WS}"/src \
-#  --isaac-ros-common "${ISAAC_ROS_WS}"/src/isaac_ros_common \
-#  --docker-tags "ros2_humble.realsense.f1tenth.deploy_custom" \
-#  --image-name "privvyledge/f1tenth/humble:latest"
-#mv "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config.bak "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config
+### Method 1: Using Nvidia Isaac ROS. Important: For x86_64, use the --base_image_key "x86_64.ros2_humble.realsense.f1tenth" and for aarch64, use "aarch64.ros2_humble.realsense.f1tenth"
+# Deploy the docker images into one ready t0 transfer/deploy image. Colcon packages must be built without --symlink-install
+export arch=$(uname -m)  # x86_64 or aarch64
+${ISAAC_ROS_WS}/src/isaac_ros_common/scripts/docker_deploy.sh \
+   --base_image_key "${arch}.ros2_humble.realsense.f1tenth" \
+   --ros_ws ${ISAAC_ROS_WS}  \
+   --name "privvyledge/f1tenth:humble-latest"
 
-### Method 2: Using Nvidia Isaac ROS. Not recommended as it does not copy environment variables
 # To add more options to the deployment script (https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_common/index.html#api-docker-deploy-sh)
 #${ISAAC_ROS_WS}/src/isaac_ros_common/scripts/docker_deploy.sh \
-#   --base_image_key "aarch64.ros2_humble.realsense.f1tenth" \
+#   --base_image_key "${arch}.ros2_humble.realsense.f1tenth" \
 #   --custom_apt_source "deb https://mycool-apt-get-server.com/ros-debian-local focal main" \
 #   --install_debians "mydebian01,libnvvpi3,tensorrt" \
 #   --include_dir /workspaces/isaac_ros-dev/tests \
@@ -64,11 +62,16 @@ cd ${ISAAC_ROS_WS}/src/isaac_ros_common/ && ./scripts/run_dev.sh -d $ISAAC_ROS_W
 #   --launch_file "isaac_ros_image_flip.launch.py" \
 #   --name "privvyledge/f1tenth:humble-latest"
 
-# Deploy the docker images into one ready t transfer/deploy image. Colcon packages must be build without --symlink-install
-${ISAAC_ROS_WS}/src/isaac_ros_common/scripts/docker_deploy.sh \
-   --base_image_key "aarch64.ros2_humble.realsense.f1tenth" \
-   --ros_ws ${ISAAC_ROS_WS}  \
-   --name "privvyledge/f1tenth:humble-latest"
+
+#### Method2: for more detailed deployment. Use the deploy_docker_image.sh script
+#mv "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config.bak
+#"${ISAAC_ROS_WS}"/src/autodriver.f1tenth/scripts/deploy_docker_image.sh \
+#  --ws-src "${ISAAC_ROS_WS}"/src \
+#  --isaac-ros-common "${ISAAC_ROS_WS}"/src/isaac_ros_common \
+#  --docker-tags "ros2_humble.realsense.f1tenth.deploy_custom" \
+#  --image-name "privvyledge/f1tenth/humble:latest"
+#mv "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config.bak "${ISAAC_ROS_WS}"/src/isaac_ros_common/scripts/.isaac_ros_common-config
+
 
 ## Run using Jetson containers
 #xhost +local:root && \
