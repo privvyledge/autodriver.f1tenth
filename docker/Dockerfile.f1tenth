@@ -341,8 +341,9 @@ RUN wget https://cmake.org/files/v3.24/cmake-3.24.0-linux-aarch64.tar.gz && \
     python3 -m pip uninstall open3d && \
     mkdir -p ${HOME}/sdks/ && cd ${HOME}/sdks/ && \
 #    git clone https://github.com/isl-org/Open3D.git && \
-    git clone --branch jetson-orin-nano --single-branch https://github.com/henryrobbins/Open3D.git && \
+    git clone --branch 0.19.0-patch https://github.com/privvyledge/Open3D.git && \
     cd Open3D && \
+    sed -i 's/cmake_minimum_required(VERSION 3\.24)/cmake_minimum_required(VERSION 3.22)/' CMakeLists.txt && \
     bash ./util/install_deps_ubuntu.sh assume-yes && \
     sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install -y --no-install-recommends \
     libglu1-mesa-dev libsdl2-dev python3-dev clang autoconf \
@@ -379,7 +380,7 @@ RUN wget https://cmake.org/files/v3.24/cmake-3.24.0-linux-aarch64.tar.gz && \
     make install-pip-package && \
     sudo make install && \
 #    echo 'export LD_PRELOAD=${HOME}/sdks/open3d_install/lib/libOpen3D.so' >> /etc/bash.bashrc && \
-    cd .. && rm -rf build
+    find . -maxdepth 1 ! -name . ! -name bin -exec rm -rf {} +
 
 #--------------------------------
 # Install Nvidia Isaac Realsense dependencies and other Isaac ROS packages
