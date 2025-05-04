@@ -273,7 +273,7 @@ RUN sudo apt-get update && \
     python3 -m pip install https://github.com/ultralytics/assets/releases/download/v0.0.0/torchvision-0.20.0a0+afc54f7-cp310-cp310-linux_aarch64.whl && \
     sudo apt-get update && sudo apt-get -y install libcusparselt0 libcusparselt-dev && \
     python3 -m pip install --upgrade pip wheel "setuptools==70.0.0" "setuptools_scm>=6.2" && \
-    cd ${HOME}/sdks/ultralytics/ && python3 -m pip install -e ".[export]" && \
+    cd ${HOME}/sdks/ultralytics/ && python3 -m pip install -e ".[export]" "lap>=0.5.12" dill onnxslim && \
     python3 -m pip install "numpy==1.26.4" && \
     sudo rm -rf /var/lib/apt/lists/*
 #    export OMP_NUM_THREADS=1 && \
@@ -328,6 +328,58 @@ RUN sudo apt-get update && \
 #    make -j$(($(nproc)-1)) && \
 #    sudo apt remove python3-blinker -y && \
 #    make install-pip-package && sudo make install
+
+
+############ Upgrade CMake to 3.24.0 and install Open3D
+#ENV PATH=/opt/cmake-3.24.0/bin:$PATH
+ENV USE_SYSTEM_BUILDS="-DUSE_SYSTEM_VTK=ON -DUSE_SYSTEM_TBB=ON -DUSE_SYSTEM_EIGEN3=ON -DUSE_SYSTEM_GLEW=ON -DUSE_SYSTEM_TBB=ON -DUSE_SYSTEM_FMT=ON -DUSE_SYSTEM_JSONCPP=ON -DUSE_SYSTEM_JPEG=ON -DUSE_SYSTEM_LIBLZF=ON -DUSE_SYSTEM_ASSIMP=ON -DUSE_SYSTEM_BLAS=ON -DUSE_SYSTEM_QHULLCPP=ON -DUSE_SYSTEM_ZEROMQ=ON"
+RUN wget https://cmake.org/files/v3.24/cmake-3.24.0-linux-aarch64.tar.gz && \
+    sudo mkdir -p /opt/cmake-3.24.0 && \
+    sudo tar --strip-components=1 -xzvf cmake-3.24.0-linux-aarch64.tar.gz -C /opt/cmake-3.24.0 && \
+    export PATH=/opt/cmake-3.24.0/bin:$PATH && \
+    rm cmake-3.24.0-linux-aarch64.tar.gz && \
+    python3 -m pip uninstall open3d && \
+    mkdir -p ${HOME}/sdks/ && cd ${HOME}/sdks/ && \
+#    git clone https://github.com/isl-org/Open3D.git && \
+    git clone --branch jetson-orin-nano --single-branch https://github.com/henryrobbins/Open3D.git && \
+    cd Open3D && \
+    bash ./util/install_deps_ubuntu.sh assume-yes && \
+    sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install -y --no-install-recommends \
+    libglu1-mesa-dev libsdl2-dev python3-dev clang autoconf \
+    ninja-build libtool libusb-1.0-0-dev libc++abi-dev \
+    libtbb-dev xorg-dev libxcb-shm0 libc++-dev \
+    libudev-dev gfortran ccache libosmesa6-dev libxi-dev git \
+    libeigen3-dev libglew-dev libtbb-dev libfmt-dev \
+    libjsoncpp-dev libjpeg-dev liblzf-dev \
+    libassimp-dev libblas-dev libqhull-dev libzmq3-dev  libvtk9-dev && sudo rm -rf /var/lib/apt/lists/* && \
+    mkdir build && cd build && \
+#    export CUDA_HOME=/usr/local/cuda && \
+#    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/targets/aarch64-linux/lib/stubs:/opt/ros/${ROS_DISTRO}/install/lib:$LD_LIBRARY_PATH && \
+#    export CUDACXX=/usr/local/cuda/bin/nvcc && export PATH=/usr/local/cuda/bin:${PATH} && \
+#    export CC=/usr/bin/clang-14 && export CXX=/usr/bin/clang++-14 &&  \
+    cmake  \
+      -DBUILD_SHARED_LIBS=ON \
+      -DBUILD_CUDA_MODULE=ON \
+      -DCMAKE_CUDA_ARCHITECTURES=87  \
+      -DBUILD_COMMON_CUDA_ARCHS=ON \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_GUI=OFF \
+      -DBUILD_LIBREALSENSE=ON -DUSE_SYSTEM_LIBREALSENSE=ON \
+      -DBUILD_AZURE_KINECT=ON \
+      -DBUILD_VTK_FROM_SOURCE=OFF \
+      -DBUILD_COMMON_CUDA_ARCHS=ON \
+      -DCMAKE_INSTALL_PREFIX=${HOME}/sdks/open3d_install \
+      -DBUILD_PYTHON_MODULE=ON  \
+      -DPython3_EXECUTABLE=/usr/bin/python3.10 ${USE_SYSTEM_BUILDS} \
+      -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"  --no-warn-unused-cli \
+      .. && \
+    make -j$(($(nproc)-1)) && \
+    sudo apt remove python3-blinker -y && \
+#    rm -rf /opt/cmake-3.24.0 && \
+    make install-pip-package && \
+    sudo make install && \
+#    echo 'export LD_PRELOAD=${HOME}/sdks/open3d_install/lib/libOpen3D.so' >> /etc/bash.bashrc && \
+    cd .. && rm -rf build
 
 #--------------------------------
 # Install Nvidia Isaac Realsense dependencies and other Isaac ROS packages
@@ -417,6 +469,7 @@ ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     CCACHE_DIR=${HOME}/ccache \
     CC=/usr/lib/ccache/gcc \
     CXX=/usr/lib/ccache/g++ \
+    LD_PRELOAD=${HOME}/sdks/open3d_install/lib/libOpen3D.so \
     RCUTILS_COLORIZED_OUTPUT=1 \
     RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})" \
     _colcon_cd_root=${ROS_ROOT}

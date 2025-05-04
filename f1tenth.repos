@@ -3,7 +3,14 @@ repositories:
     type: git
     url: https://github.com/privvyledge/f1tenth_system.git
     version: humble-devel
-
+  ros_multi_object_tracker:
+    type: git
+    url: https://github.com/privvyledge/ros_multi_object_tracker.git
+    version: v4.55.1
+  realsense-ros:
+    type: git
+    url: https://github.com/privvyledge/realsense-ros.git
+    version: master
   nonpersistent_voxel_layer:
     type: git
     url: https://github.com/SteveMacenski/nonpersistent_voxel_layer.git
@@ -47,7 +54,7 @@ repositories:
   autodriver_image_object_detection:
     type: git
     url: https://github.com/privvyledge/autodriver_image_object_detection.git
-    version: master
+    version: batch_inference_and_tracking
   autodriver_pointcloud_object_detection:
     type: git
     url: https://github.com/privvyledge/autodriver_pointcloud_object_detection.git
