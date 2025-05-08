@@ -197,7 +197,8 @@ RUN mkdir -p ${HOME}/sdks && cd ${HOME}/sdks && \
 
 #################################################### Setup YDLidar
 RUN mkdir -p "${HOME}/sdks/YDLIDAR" && cd "${HOME}/sdks/YDLIDAR" && git clone https://github.com/YDLIDAR/YDLidar-SDK.git && \
-    cd YDLidar-SDK && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make && sudo make install
+    cd YDLidar-SDK && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make -j$(nproc) && sudo make install && \
+    cd .. && sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install -y --no-install-recommends swig && python3 -m pip install .
 
 ## Tested with version v4.55.1. Could try ros2_development. Should be done in a preceeding build
 #ARG REALSENSE_ROS_BRANCH="v4.55.1"
@@ -341,7 +342,8 @@ RUN wget https://cmake.org/files/v3.24/cmake-3.24.0-linux-aarch64.tar.gz && \
     python3 -m pip uninstall open3d && \
     mkdir -p ${HOME}/sdks/ && cd ${HOME}/sdks/ && \
 #    git clone https://github.com/isl-org/Open3D.git && \
-    git clone --branch 0.19.0-patch https://github.com/privvyledge/Open3D.git && \
+#    git clone --branch 0.19.0-patch https://github.com/privvyledge/Open3D.git && \
+    git clone https://github.com/johnnynunez/Open3D.git && \
     cd Open3D && \
     sed -i 's/cmake_minimum_required(VERSION 3\.24)/cmake_minimum_required(VERSION 3.22)/' CMakeLists.txt && \
     bash ./util/install_deps_ubuntu.sh assume-yes && \
@@ -364,7 +366,7 @@ RUN wget https://cmake.org/files/v3.24/cmake-3.24.0-linux-aarch64.tar.gz && \
       -DCMAKE_CUDA_ARCHITECTURES=87  \
       -DBUILD_COMMON_CUDA_ARCHS=ON \
       -DCMAKE_BUILD_TYPE=Release \
-      -DBUILD_GUI=OFF \
+      -DBUILD_GUI=ON \
       -DBUILD_LIBREALSENSE=ON \
       -DUSE_SYSTEM_LIBREALSENSE=ON \
       -DBUILD_AZURE_KINECT=ON \
@@ -373,7 +375,6 @@ RUN wget https://cmake.org/files/v3.24/cmake-3.24.0-linux-aarch64.tar.gz && \
       -DCMAKE_INSTALL_PREFIX=/usr/local \
       -DBUILD_PYTHON_MODULE=ON  \
       -DPython3_EXECUTABLE=/usr/bin/python3.10 ${USE_SYSTEM_BUILDS} \
-      -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"  --no-warn-unused-cli \
       .. && \
     make -j$(($(nproc)-1)) && \
     sudo apt remove python3-blinker -y && \
