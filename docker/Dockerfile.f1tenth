@@ -348,13 +348,14 @@ RUN wget https://cmake.org/files/v3.24/cmake-3.24.0-linux-aarch64.tar.gz && \
     sed -i 's/cmake_minimum_required(VERSION 3\.24)/cmake_minimum_required(VERSION 3.22)/' CMakeLists.txt && \
     bash ./util/install_deps_ubuntu.sh assume-yes && \
     sudo apt-get update && DEBIAN_FRONTEND="noninteractive" sudo apt-get install -y --no-install-recommends \
-    libglu1-mesa-dev libsdl2-dev python3-dev clang autoconf \
+    libgl1-mesa-dev libglu1-mesa-dev libgl1-mesa-glx mesa-utils libsdl2-dev python3-dev clang autoconf \
     ninja-build libtool libusb-1.0-0-dev libc++abi-dev \
     libtbb-dev xorg-dev libxcb-shm0 libc++-dev \
     libudev-dev gfortran ccache libosmesa6-dev libxi-dev git \
-    libeigen3-dev libglew-dev libtbb-dev libfmt-dev \
-    libjsoncpp-dev libjpeg-dev liblzf-dev \
-    libassimp-dev libblas-dev libqhull-dev libzmq3-dev  libvtk9-dev && sudo rm -rf /var/lib/apt/lists/* && \
+    libeigen3-dev libglew-dev libtbb-dev libfmt-dev  \
+    libjsoncpp-dev libjpeg-dev libpng-dev liblzf-dev \
+    libassimp-dev libblas-dev libqhull-dev libzmq3-dev  libvtk9-dev && \
+    sudo rm -rf /var/lib/apt/lists/* && \
     mkdir build && cd build && \
 #    export CUDA_HOME=/usr/local/cuda && \
 #    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64:/usr/local/cuda/targets/aarch64-linux/lib/stubs:/opt/ros/${ROS_DISTRO}/install/lib:$LD_LIBRARY_PATH && \
@@ -380,7 +381,7 @@ RUN wget https://cmake.org/files/v3.24/cmake-3.24.0-linux-aarch64.tar.gz && \
     sudo apt remove python3-blinker -y && \
 #    rm -rf /opt/cmake-3.24.0 && \
     make install-pip-package -j$(($(nproc)-1)) && \
-    sudo make install && \
+    sudo make install -j$(nproc) && \
 #    echo 'export LD_PRELOAD=${HOME}/sdks/open3d_install/lib/libOpen3D.so' >> /etc/bash.bashrc && \
     find . -maxdepth 1 ! -name . ! -name bin -exec rm -rf {} +
 
